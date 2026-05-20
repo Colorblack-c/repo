@@ -15,6 +15,22 @@ Author: Color Black
 Name: Bottom-x
 
 Package: com.colorblack.bottomx
+Version: 0.2.32-1+debug
+Architecture: iphoneos-arm64
+Maintainer: Color Black
+Installed-Size: 1168
+Depends: mobilesubstrate | ellekit, preferenceloader, firmware (>= 14.0)
+Filename: ./debs/Bottomx_0.2.32_越狱版.deb
+Size: 148716
+MD5sum: 65d61383b9649b7b67e236d1709c6300
+SHA1: fe9b3c2088e58163f59d25a136575112e85e90f4
+SHA256: 614fa5cb6161c9db51aed77d49abcfd8f3487c36839c694ed8f79b39eac075da
+Section: Tweaks
+Description: 点击底部小白条返回，如在二级，三级页面是返回上一级，如是 app 最顶层就会返回桌面。可以注入 app 使用。 银行类app可能不起作用; 感兴趣可以加 QQ 群 2059 28931
+Author: Color Black
+Name: Bottom-x
+
+Package: com.colorblack.bottomx
 Version: 0.2.32-2+debug
 Architecture: iphoneos-arm64e
 Maintainer: Color Black
