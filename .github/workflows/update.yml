@@ -1,0 +1,33 @@
+name: Update Cydia Repo
+
+on:
+  push:
+    paths:
+      - 'debs/**/*.deb'
+      - 'debs/*.deb'
+  workflow_dispatch:
+
+jobs:
+  update-packages:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+      
+      - name: Install Tools
+        run: sudo apt-get update && sudo apt-get install -y dpkg-dev bzip2 gzip
+
+      - name: Scan Packages and Compress
+        run: |
+          mkdir -p debs
+          dpkg-scanpackages -m ./debs > Packages
+          bzip2 -c Packages > Packages.bz2
+          gzip -c Packages > Packages.gz
+          
+      - name: Auto Commit changes
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "🤖 自动更新 Packages 索引文件"
+          file_pattern: "Packages Packages.bz2 Packages.gz"
