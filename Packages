@@ -1,3 +1,35 @@
+Package: com.colorblack.bottomx
+Version: 0.2.67
+Architecture: iphoneos-arm64e
+Maintainer: Color Black
+Installed-Size: 1944
+Depends: mobilesubstrate | ellekit, preferenceloader, firmware (>= 14.0)
+Filename: ./debs/Bottomx_0.2.67_roothide_隐根版.deb
+Size: 495284
+MD5sum: bddca6facfae39438062fa9e16959488
+SHA1: cfe8cefc004308006a4e88e4f2181f6401cb792c
+SHA256: 96655de0c41494ce1a3daf9e0bef21adc3c753a7cdd07089be5990448bb9a050
+Section: Tweaks
+Description: 点击底部小白条返回，如在二级，三级页面是返回上一级，如是 app 最顶层就会返回桌面。可以注入 app 使用。 银行类app可能不起作用; 感兴趣可以加 QQ 群 2059 28931
+Author: Color Black
+Name: Bottom-x roothide
+
+Package: com.colorblack.bottomx
+Version: 0.2.67
+Architecture: iphoneos-arm64
+Maintainer: Color Black
+Installed-Size: 1944
+Depends: mobilesubstrate | ellekit, preferenceloader, firmware (>= 14.0)
+Filename: ./debs/Bottomx_0.2.67_越狱版.deb
+Size: 495898
+MD5sum: 3674bc4155be95fe3b3b41e21cc6e53c
+SHA1: 536fe09513fc1d1b5aa7ceb36299de60ebc0ad0d
+SHA256: e1421a0cf7084d6142d055de4bb324c5ff91a5fb355878804f5c81802deabe0e
+Section: Tweaks
+Description: 点击底部小白条返回，如在二级，三级页面是返回上一级，如是 app 最顶层就会返回桌面。可以注入 app 使用。 银行类app可能不起作用; 感兴趣可以加 QQ 群 2059 28931
+Author: Color Black
+Name: Bottom-x
+
 Package: com.necromancy.tweak
 Version: 1.2.6
 Architecture: iphoneos-arm64
