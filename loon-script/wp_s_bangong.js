@@ -4,7 +4,9 @@ const EFFECT_TIME = NOW - 3600;
 const VIP_NAME = "WPS超级会员基础套餐";
 const VIP_NAME_SHORT = "超级会员";
 const VIP_LEVEL = 30;
+const LEGACY_SUPER_VIP_LEVEL = 40;
 const FAR_DAYS = 36500;
+const UNLIMITED_TIMES = 999999;
 
 const EXPIRE_MARKETING_RE =
   /expire_vip|ios_vip_expire|pay_remind|order[-_]?lost|待支付|立即支付|续费|立即续费|到期|过期|临期|非会员|购买会员|开通会员|买\d*年送/i;
@@ -30,6 +32,16 @@ const PRIVILEGES = [
   "user_free_group_number", "web_2pdf", "web_2pic"
 ];
 
+const LOCAL_PRIVILEGES = Array.from(new Set(PRIVILEGES.concat([
+  "data_recover", "pdf_sign", "ai_dom_pdf", "ai_points_cn"
+])));
+
+const MEMBER_TYPES = [
+  { name: "超级会员", memberid: LEGACY_SUPER_VIP_LEVEL },
+  { name: "WPS会员", memberid: 20 },
+  { name: "稻壳会员", memberid: 12 }
+];
+
 function isObject(value) {
   return value && typeof value === "object";
 }
@@ -47,15 +59,51 @@ function patchVipInfo(vipinfo) {
   vipinfo.expired = false;
   vipinfo.expire_days = FAR_DAYS;
   vipinfo.name = vipinfo.name === "注册用户" ? VIP_NAME_SHORT : (vipinfo.name || VIP_NAME_SHORT);
-  vipinfo.enabled = Array.from(new Set([].concat(vipinfo.enabled || [], PRIVILEGES)));
+  vipinfo.enabled = Array.from(new Set([].concat(vipinfo.enabled || [], LOCAL_PRIVILEGES)));
 }
 
 function patchPrivilegeValue(value) {
   if (!isObject(value)) return;
   value.cache_available = true;
   value.expire_time = EXP_TIME;
+  value.times = UNLIMITED_TIMES;
   if (typeof value.value === "undefined") value.value = -1;
   if (typeof value.consumed === "undefined") value.consumed = 0;
+}
+
+function buildLocalPrivilege(spid) {
+  return {
+    spid,
+    times: UNLIMITED_TIMES,
+    expire_time: EXP_TIME
+  };
+}
+
+function buildEnabledMember(member) {
+  return {
+    name: member.name,
+    expire_time: EXP_TIME,
+    memberid: member.memberid
+  };
+}
+
+function patchLocalVipPayload(obj) {
+  obj.result = "ok";
+  obj.server_time = NOW;
+  obj.level = Math.max(Number(obj.level) || 0, 88);
+  obj.wealth = Math.max(Number(obj.wealth) || 0, 0);
+  obj.exp = Math.max(Number(obj.exp) || 0, 0);
+  obj.total_cost = Math.max(Number(obj.total_cost) || 0, 0);
+  obj.total_buy = Math.max(Number(obj.total_buy) || 0, 0);
+
+  obj.vip = isObject(obj.vip) ? obj.vip : {};
+  obj.vip.has_ad = 0;
+  obj.vip.name = VIP_NAME_SHORT;
+  obj.vip.memberid = LEGACY_SUPER_VIP_LEVEL;
+  obj.vip.expire_time = EXP_TIME;
+  obj.vip.enabled = MEMBER_TYPES.map(buildEnabledMember);
+
+  obj.privilege = LOCAL_PRIVILEGES.map(buildLocalPrivilege);
 }
 
 function patchPurchaseInfo(obj) {
@@ -89,6 +137,33 @@ function patchPurchaseInfo(obj) {
   });
 
   // Do not rewrite signed JWT token/trial_token fields. Keeping signatures intact is more reliable.
+}
+
+function patchPrivilegeInfo(obj, url) {
+  if (!obj.data) obj.data = {};
+  obj.data.server_time = NOW;
+  if (!isObject(obj.data.privileges)) obj.data.privileges = {};
+
+  const match = url.match(/[?&]privilege_ids=([^&]+)/);
+  const requested = match ? decodeURIComponent(match[1]).split(",") : [];
+  const ids = Array.from(new Set(requested.concat(LOCAL_PRIVILEGES)));
+  ids.forEach(id => {
+    obj.data.privileges[id] = obj.data.privileges[id] || {};
+    patchPrivilegeValue(obj.data.privileges[id]);
+  });
+
+  // Do not rewrite signed token/trial_token fields. Add plain privileges for clients that read JSON directly.
+}
+
+function patchPartnerUsable(obj) {
+  obj.result = "ok";
+  obj.msg = "";
+  if (!obj.data) obj.data = {};
+  obj.data.expire_time = EXP_TIME;
+  obj.data.now = NOW;
+  obj.data.times = UNLIMITED_TIMES;
+  obj.data.usable = true;
+  obj.data.available = true;
 }
 
 function patchVipCenter(obj) {
@@ -181,6 +256,7 @@ function recursivePatch(value, parentKey) {
     if (typeof value.memberid !== "undefined") value.memberid = VIP_LEVEL;
     if (typeof value.member_id !== "undefined") value.member_id = VIP_LEVEL;
     if (typeof value.has_ad !== "undefined") value.has_ad = 0;
+    if (typeof value.times !== "undefined") value.times = UNLIMITED_TIMES;
     if (typeof value.isVip !== "undefined") value.isVip = 1;
     if (typeof value.is_vip !== "undefined") value.is_vip = true;
     if (typeof value.vip !== "undefined" && typeof value.vip !== "object") value.vip = true;
@@ -202,13 +278,18 @@ function modifyVIP(body, url) {
     recursivePatch(obj, "");
 
     if (/\/query\/api\/v1\/list_purchase_info\?/.test(url)) patchPurchaseInfo(obj);
+    if (/\/query\/api\/v1\/list_privilege_info\?/.test(url)) patchPrivilegeInfo(obj, url);
     if (/vip\.wps\.cn\/v2\/vip_center\/my\/privilege/.test(url)) patchVipCenter(obj);
+    if (/vip\.wps\.cn\/partner\/invoke\/usable/.test(url)) patchPartnerUsable(obj);
     if (/tiance\.wps\.cn\/dce\/exec\/api\/market\/activity/.test(url)) patchMarketActivity(obj);
     if (/drive\.wps\.cn\/api\/v3\/userinfo/.test(url)) {
       obj.vipinfo = obj.vipinfo || {};
       patchVipInfo(obj.vipinfo);
       obj.is_plus = true;
       obj.curtime = NOW;
+    }
+    if (obj.vip || Array.isArray(obj.privilege) || typeof obj.total_buy !== "undefined" || typeof obj.total_cost !== "undefined") {
+      patchLocalVipPayload(obj);
     }
 
     return JSON.stringify(obj);
