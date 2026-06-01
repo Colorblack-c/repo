@@ -1,9 +1,10 @@
-const now = Math.floor(Date.now() / 1000);
-const vipExpire = now + 99 * 365 * 24 * 60 * 60;
-const vipEffect = now - 3600;
-const vipName = "WPS超级会员基础套餐";
+const EXP_TIME = Math.floor(Date.now() / 1000) + 99 * 365 * 24 * 3600;
+const NOW = Math.floor(Date.now() / 1000);
+const EFFECT_TIME = NOW - 3600;
+const VIP_NAME = "WPS超级会员基础套餐";
+const VIP_NAME_SHORT = "超级会员";
 
-const defaultPrivileges = [
+const PRIVILEGES = [
   "ads_free", "adv_filter", "advanced_print", "art_words", "audio_conversion",
   "batch_download", "batch_export", "batch_rename", "cad_2pdf", "cloud_font",
   "cloud_space", "common_bulk", "doc_2pic", "doc_check", "doc_conversion",
@@ -24,128 +25,151 @@ const defaultPrivileges = [
   "user_free_group_number", "web_2pdf", "web_2pic"
 ];
 
-function b64urlDecode(input) {
-  const normalized = input.replace(/-/g, "+").replace(/_/g, "/");
-  const padded = normalized + "=".repeat((4 - normalized.length % 4) % 4);
-  return decodeURIComponent(
-    Array.prototype.map.call(atob(padded), c =>
-      "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2)
-    ).join("")
-  );
+function isObject(value) {
+  return value && typeof value === "object";
 }
 
-function b64urlEncode(input) {
-  const encoded = btoa(unescape(encodeURIComponent(input)));
-  return encoded.replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/g, "");
+function patchVipInfo(vipinfo) {
+  if (!isObject(vipinfo)) return;
+  vipinfo.expire_time = EXP_TIME;
+  vipinfo.vip_end_time = EXP_TIME;
+  vipinfo.end_time = EXP_TIME;
+  vipinfo.memberid = 30;
+  vipinfo.member_id = 30;
+  vipinfo.has_ad = 0;
+  vipinfo.name = vipinfo.name === "注册用户" ? VIP_NAME_SHORT : (vipinfo.name || VIP_NAME_SHORT);
+  vipinfo.enabled = Array.from(new Set([].concat(vipinfo.enabled || [], PRIVILEGES)));
 }
 
-function setPrivilege(privileges, key, value) {
-  privileges[key] = Object.assign(
-    { cache_available: true, expire_time: vipExpire, value: value, consumed: 0 },
-    privileges[key] || {}
-  );
-  privileges[key].expire_time = vipExpire;
-  if (typeof privileges[key].value === "undefined") privileges[key].value = value;
-  if (typeof privileges[key].consumed === "undefined") privileges[key].consumed = 0;
-  if (typeof privileges[key].cache_available === "undefined") privileges[key].cache_available = true;
-}
-
-function patchToken(token, extraKeys) {
-  if (!token || token.split(".").length !== 3) return token;
-  try {
-    const parts = token.split(".");
-    const payload = JSON.parse(b64urlDecode(parts[1]));
-    payload.exp = vipExpire;
-    payload.privileges = payload.privileges || {};
-
-    Object.keys(payload.privileges).forEach(key => {
-      if (payload.privileges[key] && typeof payload.privileges[key] === "object") {
-        payload.privileges[key].expire_time = vipExpire;
-      }
-    });
-
-    defaultPrivileges.concat(extraKeys || []).forEach(key => setPrivilege(payload.privileges, key, -1));
-    return parts[0] + "." + b64urlEncode(JSON.stringify(payload)) + "." + parts[2];
-  } catch (e) {
-    return token;
-  }
+function patchPrivilegeValue(value) {
+  if (!isObject(value)) return;
+  value.cache_available = true;
+  value.expire_time = EXP_TIME;
+  if (typeof value.value === "undefined") value.value = -1;
+  if (typeof value.consumed === "undefined") value.consumed = 0;
 }
 
 function patchPurchaseInfo(obj) {
   if (!obj.data) obj.data = {};
-  obj.data.server_time = now;
+  obj.data.server_time = NOW;
   if (!Array.isArray(obj.data.merchandises)) obj.data.merchandises = [];
 
-  let vip = obj.data.merchandises.find(item => item && item.sku_key === "vip_pro");
+  let vip = obj.data.merchandises.find(item => item && (item.sku_key === "vip_pro" || item.type === "vip"));
   if (!vip) {
-    vip = { sku_key: "vip_pro", effect_time: vipEffect, expire_time: vipExpire, name: vipName, type: "vip" };
+    vip = {
+      sku_key: "vip_pro",
+      effect_time: EFFECT_TIME,
+      expire_time: EXP_TIME,
+      name: VIP_NAME,
+      type: "vip"
+    };
     obj.data.merchandises.unshift(vip);
   }
 
   obj.data.merchandises.forEach(item => {
-    if (!item || typeof item !== "object") return;
+    if (!isObject(item)) return;
     if (item.sku_key === "vip_pro" || item.type === "vip") {
-      item.sku_key = item.sku_key || "vip_pro";
+      item.sku_key = "vip_pro";
       item.type = "vip";
-      item.name = item.name || vipName;
-      item.effect_time = item.effect_time || vipEffect;
-      item.expire_time = vipExpire;
+      item.name = item.name || VIP_NAME;
+      item.effect_time = item.effect_time || EFFECT_TIME;
+      item.expire_time = EXP_TIME;
+      item.vip_end_time = EXP_TIME;
+      item.end_time = EXP_TIME;
     }
   });
 
-  obj.data.token = patchToken(obj.data.token, []);
-  obj.data.trial_token = patchToken(obj.data.trial_token, []);
-}
-
-function patchPrivilegeInfo(obj, url) {
-  if (!obj.data) obj.data = {};
-  obj.data.server_time = now;
-  const ids = [];
-  try {
-    const query = url.split("?")[1] || "";
-    query.split("&").forEach(pair => {
-      const kv = pair.split("=");
-      if (kv[0] === "privilege_ids") decodeURIComponent(kv[1] || "").split(",").forEach(id => ids.push(id));
-    });
-  } catch (e) {}
-  obj.data.token = patchToken(obj.data.token, ids);
-  obj.data.trial_token = patchToken(obj.data.trial_token, ids);
-}
-
-function patchUserInfo(obj) {
-  obj.vipinfo = Object.assign({}, obj.vipinfo || {}, {
-    expire_time: vipExpire,
-    memberid: 20,
-    has_ad: 0,
-    name: "WPS超级会员",
-    enabled: defaultPrivileges
-  });
-  obj.is_plus = true;
-  obj.curtime = now;
+  // Do not rewrite signed JWT token/trial_token fields. Keeping signatures intact is more reliable.
 }
 
 function patchVipCenter(obj) {
   obj.result = "ok";
   obj.msg = obj.msg || "";
-  obj.data = Array.from(new Set([].concat(obj.data || [], defaultPrivileges)));
+  obj.data = Array.from(new Set([].concat(obj.data || [], PRIVILEGES)));
 }
 
-function patchSignInfo(obj) {
-  if (obj.data && obj.data.info) obj.data.info.isVip = 1;
+function patchKnownContainers(obj) {
+  patchVipInfo(obj.vipinfo);
+
+  if (obj.data) {
+    patchVipInfo(obj.data.vipinfo);
+    if (obj.data.user) patchVipInfo(obj.data.user.vipinfo);
+    if (obj.data.info && typeof obj.data.info.isVip !== "undefined") obj.data.info.isVip = 1;
+    if (obj.data.privileges) {
+      Object.keys(obj.data.privileges).forEach(key => patchPrivilegeValue(obj.data.privileges[key]));
+    }
+  }
+
+  if (typeof obj.is_plus !== "undefined") obj.is_plus = true;
+  if (typeof obj.is_vip !== "undefined") obj.is_vip = true;
+  if (typeof obj.isVip !== "undefined") obj.isVip = 1;
+  if (typeof obj.curtime !== "undefined") obj.curtime = NOW;
 }
 
-let body = $response.body;
-try {
-  const url = $request.url || "";
-  const obj = JSON.parse(body);
+function recursivePatch(value, parentKey) {
+  if (!isObject(value)) return;
 
-  if (/\/query\/api\/v1\/list_purchase_info\?/.test(url)) patchPurchaseInfo(obj);
-  if (/\/query\/api\/v1\/list_privilege_info\?/.test(url)) patchPrivilegeInfo(obj, url);
-  if (/drive\.wps\.cn\/api\/v3\/userinfo/.test(url)) patchUserInfo(obj);
-  if (/vip\.wps\.cn\/v2\/vip_center\/my\/privilege/.test(url)) patchVipCenter(obj);
-  if (/personal-bus\.wps\.cn\/sign_in\/v1\/day_info/.test(url)) patchSignInfo(obj);
+  if (Array.isArray(value)) {
+    value.forEach(item => recursivePatch(item, parentKey));
+    return;
+  }
 
-  body = JSON.stringify(obj);
-} catch (e) {}
+  const keys = Object.keys(value);
+  const looksVip =
+    /vip|member|privilege|purchase|merchandise/i.test(parentKey || "") ||
+    keys.some(key => /vip|member|sku_key|expire|privilege/i.test(key));
 
-$done({ body });
+  if (looksVip) {
+    if (value.sku_key === "vip_pro" || value.type === "vip") {
+      value.sku_key = "vip_pro";
+      value.type = "vip";
+      value.name = value.name || VIP_NAME;
+      value.effect_time = value.effect_time || EFFECT_TIME;
+    }
+
+    if (typeof value.expire_time !== "undefined") value.expire_time = EXP_TIME;
+    if (typeof value.vip_end_time !== "undefined") value.vip_end_time = EXP_TIME;
+    if (typeof value.end_time !== "undefined") value.end_time = EXP_TIME;
+    if (typeof value.deadline !== "undefined") value.deadline = EXP_TIME;
+    if (typeof value.memberid !== "undefined") value.memberid = 30;
+    if (typeof value.member_id !== "undefined") value.member_id = 30;
+    if (typeof value.has_ad !== "undefined") value.has_ad = 0;
+    if (typeof value.isVip !== "undefined") value.isVip = 1;
+    if (typeof value.is_vip !== "undefined") value.is_vip = true;
+    if (typeof value.vip !== "undefined" && typeof value.vip !== "object") value.vip = true;
+  }
+
+  keys.forEach(key => recursivePatch(value[key], key));
+}
+
+function modifyVIP(body, url) {
+  try {
+    const obj = JSON.parse(body);
+
+    patchKnownContainers(obj);
+    recursivePatch(obj, "");
+
+    if (/\/query\/api\/v1\/list_purchase_info\?/.test(url)) patchPurchaseInfo(obj);
+    if (/vip\.wps\.cn\/v2\/vip_center\/my\/privilege/.test(url)) patchVipCenter(obj);
+    if (/drive\.wps\.cn\/api\/v3\/userinfo/.test(url)) {
+      obj.vipinfo = obj.vipinfo || {};
+      patchVipInfo(obj.vipinfo);
+      obj.is_plus = true;
+      obj.curtime = NOW;
+    }
+
+    return JSON.stringify(obj);
+  } catch (e) {
+    return body;
+  }
+}
+
+const url = $request.url || "";
+let body = $response.body || "";
+
+if (/wps\.cn/.test(url) && body) {
+  body = modifyVIP(body, url);
+  $done({ body });
+} else {
+  $done({});
+}
