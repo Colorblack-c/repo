@@ -33,7 +33,9 @@ const PRIVILEGES = [
 ];
 
 const LOCAL_PRIVILEGES = Array.from(new Set(PRIVILEGES.concat([
-  "data_recover", "pdf_sign", "ai_dom_pdf", "ai_points_cn"
+  "data_recover", "pdf_sign", "ai_dom_pdf", "ai_points_cn",
+  "pic2PDF", "pic2pdf", "pic_2_pdf", "pic2_pdf", "pic_to_pdf",
+  "picture_2pdf", "image_2pdf", "img_2pdf", "scan2pdf", "pic_2pdf"
 ])));
 
 const MEMBER_TYPES = [
@@ -69,6 +71,41 @@ function patchPrivilegeValue(value) {
   value.times = UNLIMITED_TIMES;
   if (typeof value.value === "undefined") value.value = -1;
   if (typeof value.consumed === "undefined") value.consumed = 0;
+}
+
+function b64urlDecode(input) {
+  const normalized = input.replace(/-/g, "+").replace(/_/g, "/");
+  const padded = normalized + "=".repeat((4 - normalized.length % 4) % 4);
+  return decodeURIComponent(Array.prototype.map.call(atob(padded), c =>
+    "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2)
+  ).join(""));
+}
+
+function b64urlEncode(input) {
+  return btoa(unescape(encodeURIComponent(input)))
+    .replace(/\+/g, "-")
+    .replace(/\//g, "_")
+    .replace(/=+$/g, "");
+}
+
+function patchPrivilegeToken(token, ids) {
+  if (!token || String(token).split(".").length !== 3) return token;
+  try {
+    const parts = String(token).split(".");
+    const payload = JSON.parse(b64urlDecode(parts[1]));
+    payload.exp = EXP_TIME;
+    payload.privileges = isObject(payload.privileges) ? payload.privileges : {};
+
+    Array.from(new Set([].concat(ids || [], LOCAL_PRIVILEGES))).forEach(id => {
+      payload.privileges[id] = isObject(payload.privileges[id]) ? payload.privileges[id] : {};
+      patchPrivilegeValue(payload.privileges[id]);
+    });
+
+    Object.keys(payload.privileges).forEach(key => patchPrivilegeValue(payload.privileges[key]));
+    return parts[0] + "." + b64urlEncode(JSON.stringify(payload)) + "." + parts[2];
+  } catch (e) {
+    return token;
+  }
 }
 
 function buildLocalPrivilege(spid) {
@@ -136,7 +173,8 @@ function patchPurchaseInfo(obj) {
     }
   });
 
-  // Do not rewrite signed JWT token/trial_token fields. Keeping signatures intact is more reliable.
+  obj.data.token = patchPrivilegeToken(obj.data.token, LOCAL_PRIVILEGES);
+  obj.data.trial_token = patchPrivilegeToken(obj.data.trial_token, LOCAL_PRIVILEGES);
 }
 
 function patchPrivilegeInfo(obj, url) {
@@ -152,7 +190,8 @@ function patchPrivilegeInfo(obj, url) {
     patchPrivilegeValue(obj.data.privileges[id]);
   });
 
-  // Do not rewrite signed token/trial_token fields. Add plain privileges for clients that read JSON directly.
+  obj.data.token = patchPrivilegeToken(obj.data.token, ids);
+  obj.data.trial_token = patchPrivilegeToken(obj.data.trial_token, ids);
 }
 
 function patchPartnerUsable(obj) {
@@ -169,7 +208,7 @@ function patchPartnerUsable(obj) {
 function patchVipCenter(obj) {
   obj.result = "ok";
   obj.msg = obj.msg || "";
-  obj.data = Array.from(new Set([].concat(obj.data || [], PRIVILEGES)));
+  obj.data = Array.from(new Set([].concat(obj.data || [], LOCAL_PRIVILEGES)));
 }
 
 function hasExpireMarketing(value) {
