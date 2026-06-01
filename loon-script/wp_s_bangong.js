@@ -3,6 +3,11 @@ const NOW = Math.floor(Date.now() / 1000);
 const EFFECT_TIME = NOW - 3600;
 const VIP_NAME = "WPS超级会员基础套餐";
 const VIP_NAME_SHORT = "超级会员";
+const VIP_LEVEL = 30;
+const FAR_DAYS = 36500;
+
+const EXPIRE_MARKETING_RE =
+  /expire_vip|ios_vip_expire|pay_remind|order[-_]?lost|待支付|立即支付|续费|立即续费|到期|过期|临期|非会员|购买会员|开通会员|买\d*年送/i;
 
 const PRIVILEGES = [
   "ads_free", "adv_filter", "advanced_print", "art_words", "audio_conversion",
@@ -34,9 +39,13 @@ function patchVipInfo(vipinfo) {
   vipinfo.expire_time = EXP_TIME;
   vipinfo.vip_end_time = EXP_TIME;
   vipinfo.end_time = EXP_TIME;
-  vipinfo.memberid = 30;
-  vipinfo.member_id = 30;
+  vipinfo.memberid = VIP_LEVEL;
+  vipinfo.member_id = VIP_LEVEL;
   vipinfo.has_ad = 0;
+  vipinfo.is_expire = false;
+  vipinfo.is_expired = false;
+  vipinfo.expired = false;
+  vipinfo.expire_days = FAR_DAYS;
   vipinfo.name = vipinfo.name === "注册用户" ? VIP_NAME_SHORT : (vipinfo.name || VIP_NAME_SHORT);
   vipinfo.enabled = Array.from(new Set([].concat(vipinfo.enabled || [], PRIVILEGES)));
 }
@@ -88,6 +97,40 @@ function patchVipCenter(obj) {
   obj.data = Array.from(new Set([].concat(obj.data || [], PRIVILEGES)));
 }
 
+function hasExpireMarketing(value) {
+  if (!isObject(value)) return EXPIRE_MARKETING_RE.test(String(value || ""));
+  try {
+    return EXPIRE_MARKETING_RE.test(JSON.stringify(value));
+  } catch (e) {
+    return false;
+  }
+}
+
+function filterExpireMarketing(value) {
+  if (!isObject(value)) return;
+
+  if (Array.isArray(value)) {
+    for (let i = value.length - 1; i >= 0; i--) {
+      const item = value[i];
+      if (hasExpireMarketing(item)) {
+        value.splice(i, 1);
+      } else {
+        filterExpireMarketing(item);
+      }
+    }
+    return;
+  }
+
+  Object.keys(value).forEach(key => filterExpireMarketing(value[key]));
+}
+
+function patchMarketActivity(obj) {
+  if (Array.isArray(obj.data)) filterExpireMarketing(obj.data);
+  obj.result = obj.result || "ok";
+  if (typeof obj.code !== "undefined") obj.code = 1000000;
+  obj.msg = obj.msg || "成功";
+}
+
 function patchKnownContainers(obj) {
   patchVipInfo(obj.vipinfo);
 
@@ -103,6 +146,10 @@ function patchKnownContainers(obj) {
   if (typeof obj.is_plus !== "undefined") obj.is_plus = true;
   if (typeof obj.is_vip !== "undefined") obj.is_vip = true;
   if (typeof obj.isVip !== "undefined") obj.isVip = 1;
+  if (typeof obj.is_expire !== "undefined") obj.is_expire = false;
+  if (typeof obj.is_expired !== "undefined") obj.is_expired = false;
+  if (typeof obj.expired !== "undefined") obj.expired = false;
+  if (typeof obj.expire_days !== "undefined") obj.expire_days = FAR_DAYS;
   if (typeof obj.curtime !== "undefined") obj.curtime = NOW;
 }
 
@@ -131,12 +178,17 @@ function recursivePatch(value, parentKey) {
     if (typeof value.vip_end_time !== "undefined") value.vip_end_time = EXP_TIME;
     if (typeof value.end_time !== "undefined") value.end_time = EXP_TIME;
     if (typeof value.deadline !== "undefined") value.deadline = EXP_TIME;
-    if (typeof value.memberid !== "undefined") value.memberid = 30;
-    if (typeof value.member_id !== "undefined") value.member_id = 30;
+    if (typeof value.memberid !== "undefined") value.memberid = VIP_LEVEL;
+    if (typeof value.member_id !== "undefined") value.member_id = VIP_LEVEL;
     if (typeof value.has_ad !== "undefined") value.has_ad = 0;
     if (typeof value.isVip !== "undefined") value.isVip = 1;
     if (typeof value.is_vip !== "undefined") value.is_vip = true;
     if (typeof value.vip !== "undefined" && typeof value.vip !== "object") value.vip = true;
+    if (typeof value.is_expire !== "undefined") value.is_expire = false;
+    if (typeof value.is_expired !== "undefined") value.is_expired = false;
+    if (typeof value.expired !== "undefined") value.expired = false;
+    if (typeof value.expire_days !== "undefined") value.expire_days = FAR_DAYS;
+    if (typeof value.remaining_days !== "undefined") value.remaining_days = FAR_DAYS;
   }
 
   keys.forEach(key => recursivePatch(value[key], key));
@@ -151,6 +203,7 @@ function modifyVIP(body, url) {
 
     if (/\/query\/api\/v1\/list_purchase_info\?/.test(url)) patchPurchaseInfo(obj);
     if (/vip\.wps\.cn\/v2\/vip_center\/my\/privilege/.test(url)) patchVipCenter(obj);
+    if (/tiance\.wps\.cn\/dce\/exec\/api\/market\/activity/.test(url)) patchMarketActivity(obj);
     if (/drive\.wps\.cn\/api\/v3\/userinfo/.test(url)) {
       obj.vipinfo = obj.vipinfo || {};
       patchVipInfo(obj.vipinfo);
