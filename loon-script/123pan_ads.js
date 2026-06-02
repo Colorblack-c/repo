@@ -57,13 +57,21 @@ function cleanRemoveAdConfig(data) {
 function cleanProjectAdConfig(data) {
   if (!data || typeof data !== "object") return;
 
-  data.bannerList = [];
+  data.bannerList = null;
+  data.advertResource = null;
+  data.advertResourceList = null;
+  data.advertisementList = null;
+  data.homeBannerList = null;
+  data.middleBannerList = null;
   data.isInitAd = 0;
   data.isOpenAbortAd = false;
   data.isOpenDownloadAd = false;
   data.isOpenMineAd = false;
   data.isOpenSplash = false;
   data.isOpenUploadAd = false;
+  data.allInterval = 0;
+  data.expirTime = 0;
+  data.interstitialInterval = 0;
   data.interstitialShowCount = 0;
   data.showCount = 0;
   data.splashInterval = 0;
