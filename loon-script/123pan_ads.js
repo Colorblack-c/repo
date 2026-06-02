@@ -23,6 +23,42 @@ function noAdId() {
   return `${Date.now()}${Math.floor(Math.random() * 100000)}`;
 }
 
+function isHomeAdResource(value) {
+  return typeof value === "string" && /\/static-by-custom\/img\/app_ad_[^/]+\.(?:png|jpe?g|webp|gif)/i.test(value);
+}
+
+function hasHomeAdResource(value) {
+  if (!value || typeof value !== "object") return isHomeAdResource(value);
+  if (Array.isArray(value)) return value.some(hasHomeAdResource);
+  return Object.keys(value).some((key) => hasHomeAdResource(value[key]));
+}
+
+function scrubHomeAdResources(value, depth) {
+  if (!value || typeof value !== "object" || depth > 8) return;
+
+  if (Array.isArray(value)) {
+    for (let i = value.length - 1; i >= 0; i -= 1) {
+      if (hasHomeAdResource(value[i])) {
+        value.splice(i, 1);
+      } else {
+        scrubHomeAdResources(value[i], depth + 1);
+      }
+    }
+    return;
+  }
+
+  Object.keys(value).forEach((key) => {
+    const child = value[key];
+    if (Array.isArray(child) && hasHomeAdResource(child)) {
+      value[key] = null;
+    } else if (isHomeAdResource(child)) {
+      value[key] = "";
+    } else {
+      scrubHomeAdResources(child, depth + 1);
+    }
+  });
+}
+
 function cleanRemoveAdConfig(data) {
   if (!data || typeof data !== "object") return;
 
@@ -83,9 +119,15 @@ function cleanProjectAdConfig(data) {
     data.preloadConfig.iosInter = 0;
     data.preloadConfig.iosSplash = 0;
   }
+
+  scrubHomeAdResources(data, 0);
 }
 
-if (/api\.123278\.com\/api\/app\/config\/get/.test(url)) {
+function isMainApiHost() {
+  return /(?:api\.123278\.com|apigate\.123295\.com|apigate\.123773\.com)\/api\//.test(url);
+}
+
+if (isMainApiHost() && /\/api\/app\/config\/get/.test(url)) {
   const obj = safeJson(body);
   if (obj && obj.data) {
     cleanRemoveAdConfig(obj.data);
@@ -93,7 +135,7 @@ if (/api\.123278\.com\/api\/app\/config\/get/.test(url)) {
   } else {
     finish(body);
   }
-} else if (/api\.123278\.com\/api\/config\/get/.test(url)) {
+} else if (isMainApiHost() && /\/api\/config\/get/.test(url)) {
   const obj = safeJson(body);
   if (obj && obj.data) {
     cleanProjectAdConfig(obj.data);
@@ -101,7 +143,7 @@ if (/api\.123278\.com\/api\/app\/config\/get/.test(url)) {
   } else {
     finish(body);
   }
-} else if (/api\.123278\.com\/api\/v2\/advert_resource\/get/.test(url)) {
+} else if (isMainApiHost() && /\/api\/v2\/advert_resource\/get/.test(url)) {
   const obj = safeJson(body);
   if (obj) {
     obj.code = 0;
