@@ -24,7 +24,10 @@ function noAdId() {
 }
 
 function isHomeAdResource(value) {
-  return typeof value === "string" && /\/static-by-custom\/img\/app_ad_[^/]+\.(?:png|jpe?g|webp|gif)/i.test(value);
+  return typeof value === "string" && (
+    /\/static-by-custom\/img\/app_ad_[^/]+\.(?:png|jpe?g|webp|gif)/i.test(value) ||
+    /\/manager\/advert_resource\/[^/]+\.(?:png|jpe?g|webp|gif)/i.test(value)
+  );
 }
 
 function hasHomeAdResource(value) {
@@ -57,6 +60,20 @@ function scrubHomeAdResources(value, depth) {
       scrubHomeAdResources(child, depth + 1);
     }
   });
+}
+
+function cleanUserAdState(data) {
+  if (!data || typeof data !== "object") return;
+
+  data.IsShowAdvertisement = false;
+  data.BuyRemoveAds = 0;
+  data.RemoveAdsTime = 0;
+  data.RemoveAdsEffect = 0;
+  data.ActivityPopupConfig = "";
+  data.ActivityJsUrl = "";
+  data.ActivityPopupID = 0;
+
+  scrubHomeAdResources(data, 0);
 }
 
 function cleanRemoveAdConfig(data) {
@@ -123,6 +140,41 @@ function cleanProjectAdConfig(data) {
   scrubHomeAdResources(data, 0);
 }
 
+function cleanOwnAdResourcePayload(obj) {
+  if (!obj || typeof obj !== "object") return;
+
+  const data = obj.data;
+  if (data && typeof data === "object") {
+    scrubHomeAdResources(data, 0);
+
+    if (Array.isArray(data)) {
+      obj.data = [];
+      return;
+    }
+
+    [
+      "advertResource",
+      "advertResourceList",
+      "advertisementList",
+      "ownAdInfo",
+      "ownAdInfoList",
+      "resourceList",
+      "list",
+      "records",
+      "popupList",
+      "bannerList",
+      "homeBannerList",
+      "middleBannerList"
+    ].forEach((key) => {
+      if (key in data) data[key] = Array.isArray(data[key]) ? [] : null;
+    });
+  }
+
+  obj.code = 0;
+  obj.message = obj.message || "ok";
+  if (!("data" in obj)) obj.data = {};
+}
+
 function isMainApiHost() {
   return /(?:api\.123278\.com|apigate\.123295\.com|apigate\.123773\.com)\/api\//.test(url);
 }
@@ -143,11 +195,39 @@ if (isMainApiHost() && /\/api\/app\/config\/get/.test(url)) {
   } else {
     finish(body);
   }
+} else if (isMainApiHost() && /\/api\/user\/(?:info|get\/info)/.test(url)) {
+  const obj = safeJson(body);
+  if (obj && obj.data) {
+    cleanUserAdState(obj.data);
+    finish(obj);
+  } else {
+    finish(body);
+  }
+} else if (isMainApiHost() && /\/api\/restful\/goapi\/v1\/remove_ads\/config/.test(url)) {
+  const obj = safeJson(body);
+  if (obj) {
+    if (obj.data) {
+      cleanRemoveAdConfig(obj.data);
+      cleanUserAdState(obj.data);
+    } else {
+      obj.data = {};
+    }
+    finish(obj);
+  } else {
+    finish({ code: 0, message: "ok", data: {} });
+  }
+} else if (isMainApiHost() && /\/api\/restful\/goapi\/v1\/app\/resource\/update/.test(url)) {
+  const obj = safeJson(body);
+  if (obj) {
+    cleanOwnAdResourcePayload(obj);
+    finish(obj);
+  } else {
+    finish(body);
+  }
 } else if (isMainApiHost() && /\/api\/v2\/advert_resource\/get/.test(url)) {
   const obj = safeJson(body);
   if (obj) {
-    obj.code = 0;
-    obj.message = obj.message || "ok";
+    cleanOwnAdResourcePayload(obj);
     obj.data = Array.isArray(obj.data) ? [] : {};
     finish(obj);
   } else {
