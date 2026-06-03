@@ -330,12 +330,121 @@ function emptyAppAdConfigResponse() {
   };
 }
 
+function emptyAnyThinkAppResponse() {
+  return {
+    code: 0,
+    msg: "Success",
+    data: {
+      scet: 3600000,
+      pl_n: 0,
+      c_a: 0,
+      logger: {
+        tk_address: "",
+        da_address: "",
+        tk_max_amount: 0,
+        da_max_amount: 0
+      },
+      preinit: [],
+      adx: {
+        req_sw: 0,
+        bid_sw: 0,
+        tk_sw: 0,
+        req_addr: "",
+        bid_addr: "",
+        tk_addr: ""
+      },
+      nw_eu_def: 0,
+      la_sw: 0,
+      crash_sw: 0,
+      n_l: {},
+      tmp: {},
+      n_cache: {}
+    }
+  };
+}
+
+function emptyAnyThinkPlacementResponse() {
+  return {
+    code: 0,
+    msg: "Success",
+    data: {
+      session_id: noAdId(),
+      ps_id: "",
+      ps_id_timeout: 0,
+      ad_delivery_sw: 0,
+      req_ug_num: 0,
+      unit_caps_d: 0,
+      unit_caps_h: 0,
+      unit_pacing: 0,
+      wifi_auto_sw: 0,
+      show_type: 0,
+      refresh: 0,
+      auto_refresh: 0,
+      auto_refresh_time: 0,
+      auto_refresh_type: 0,
+      platform: 2,
+      format: 0,
+      gro_id: 0,
+      s_t: 0,
+      l_s_t: 0,
+      ps_ct: 0,
+      ps_ct_out: 0,
+      pucs: 0,
+      hb_start_time: 0,
+      hb_bid_timeout: 0,
+      ug_list: [],
+      hb_list: [],
+      s2shb_list: [],
+      adx_list: [],
+      dsp_list: [],
+      ol_list: [],
+      inh_list: [],
+      bottom_list: [],
+      doffer_list: [],
+      dn_c2shb_list: [],
+      dn_s2shb_list: [],
+      m_o: [],
+      m_o_s: {},
+      m_o_ks: {},
+      wf_obj: "{}",
+      n_cache: {}
+    }
+  };
+}
+
+function emptyAnyThinkBidResponse() {
+  return {
+    code: 0,
+    msg: "success",
+    data: []
+  };
+}
+
+function emptyBaiduAdResponse() {
+  return {
+    ad: [],
+    n: 0,
+    error_code: 200000,
+    req_id: noAdId(),
+    qk: noAdId(),
+    no_ad_lurl: []
+  };
+}
+
 if (isRequestPhase && isBannerConfigRequest()) {
   finish({ __response: emptyProjectAdResponse() });
 } else if (isRequestPhase && isMainApiHost() && /\/api\/v2\/advert_resource\/get/.test(url)) {
   finish({ __response: { code: 0, message: "ok", data: [] } });
 } else if (isRequestPhase && isMainApiHost() && /\/api\/app\/config\/get/.test(url)) {
   finish({ __response: emptyAppAdConfigResponse() });
+} else if (isRequestPhase && /api\.anythinktech\.com\/v2\/open\/app/.test(url)) {
+  finish({ __response: emptyAnyThinkAppResponse() });
+} else if (isRequestPhase && /api\.anythinktech\.com\/v2\/open\/placement/.test(url)) {
+  finish({ __response: emptyAnyThinkPlacementResponse() });
+} else if (isRequestPhase && /(?:adx|adx-bj|adx-bj-req)\.anythinktech\.com\/(?:request|bid)/.test(url)) {
+  finish({ __response: emptyAnyThinkBidResponse() });
+} else if (isRequestPhase && /mobads\.baidu\.com\/cpro\/ui\/mads\.php/.test(url)) {
+  finish({ __response: emptyBaiduAdResponse() });
 } else if (isRequestPhase) {
   $done({});
 } else if (isBootstrapConfig()) {
@@ -401,14 +510,13 @@ if (isRequestPhase && isBannerConfigRequest()) {
     finish({ code: 0, message: "ok", data: {} });
   }
 } else if (/mobads\.baidu\.com\/cpro\/ui\/mads\.php/.test(url)) {
-  finish({
-    ad: [],
-    n: 0,
-    error_code: 200000,
-    req_id: noAdId(),
-    qk: noAdId(),
-    no_ad_lurl: []
-  });
+  finish(emptyBaiduAdResponse());
+} else if (/api\.anythinktech\.com\/v2\/open\/app/.test(url)) {
+  finish(emptyAnyThinkAppResponse());
+} else if (/api\.anythinktech\.com\/v2\/open\/placement/.test(url)) {
+  finish(emptyAnyThinkPlacementResponse());
+} else if (/(?:adx|adx-bj|adx-bj-req)\.anythinktech\.com\/(?:request|bid)/.test(url)) {
+  finish(emptyAnyThinkBidResponse());
 } else if (/(api-access\.pangolin-sdk-toutiao(?:1)?\.com|gromore\.pangolin-sdk-toutiao\.com)\/api\/ad\/union\//.test(url)) {
   finish({
     request_id: noAdId(),
