@@ -124,16 +124,23 @@ function cleanRemoveAdConfig(data) {
 function cleanProjectAdConfig(data) {
   if (!data || typeof data !== "object") return;
 
+  data.BannerAdv = [];
+  data.bannerAdv = [];
   data.bannerList = [];
+  data.adList = [];
   data.advertResource = [];
   data.advertResourceList = [];
   data.advertisementList = [];
+  data.advBannerList = [];
   data.homeBannerList = [];
   data.middleBannerList = [];
   data.carouselList = [];
   data.swiperList = [];
   data.focusList = [];
-  data.ownAdInfo = {};
+  data.ownAdInfo = { 2001: [] };
+  data.ownAdInfoList = [];
+  data.resourceList = [];
+  data.records = [];
   data.isInitAd = 0;
   data.isOpenAbortAd = false;
   data.isOpenDownloadAd = false;
@@ -189,6 +196,13 @@ function cleanOwnAdResourcePayload(obj) {
     ].forEach((key) => {
       if (key in data) data[key] = Array.isArray(data[key]) ? [] : {};
     });
+
+    data.ownAdInfo = { 2001: [] };
+    data.ownAdInfoList = [];
+    data.advert_position = 0;
+    data.advert_id = 0;
+    data.image_url = "";
+    data.jump_url = "";
   }
 
   obj.code = 0;
