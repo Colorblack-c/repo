@@ -5,9 +5,23 @@ For Loon response rewrite. Upload this file to:
 */
 
 const url = $request.url;
-let body = $response.body || "";
+const isRequestPhase = typeof $response === "undefined";
+let body = isRequestPhase ? ($request.body || "") : ($response.body || "");
 
 function finish(value) {
+  if (isRequestPhase && value && typeof value === "object" && value.__response) {
+    $done({
+      response: {
+        status: 200,
+        headers: {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        body: JSON.stringify(value.__response)
+      }
+    });
+    return;
+  }
+
   $done({ body: typeof value === "string" ? value : JSON.stringify(value) });
 }
 
@@ -94,6 +108,16 @@ function cleanRemoveAdConfig(data) {
   if (!data || typeof data !== "object") return;
 
   data.isInitAd = 0;
+  data.BuyRemoveAds = 0;
+  data.RemoveAdsTime = 0;
+  data.RemoveAdsEffect = 0;
+  data.removeAdsEffect = 0;
+  data.button_download = 0;
+  data.button_quit = 0;
+  data.button_return_file = 0;
+  data.button_splash_screen = 0;
+  data.button_upload = 0;
+  data.button_user_center = 0;
 
   if (data.removeAdConfig && typeof data.removeAdConfig === "object") {
     const cfg = data.removeAdConfig;
@@ -218,7 +242,103 @@ function isBootstrapConfig() {
   return /apigate\.123795\.com\/getconfig-api\/v1\/getconfig/.test(url);
 }
 
-if (isBootstrapConfig()) {
+function isBannerConfigRequest() {
+  return isMainApiHost() &&
+    /\/api\/config\/get/.test(url) &&
+    /"business_key"\s*:\s*"BannerAdv"|"business_keys"\s*:\s*\[[^\]]*"BannerAdv"/.test(body);
+}
+
+function emptyProjectAdResponse() {
+  return {
+    code: 0,
+    message: "ok",
+    data: {
+      allInterval: 0,
+      bannerList: [],
+      BannerAdv: [],
+      bannerAdv: [],
+      carouselList: [],
+      swiperList: [],
+      focusList: [],
+      ownAdInfo: { 2001: [] },
+      ownAdInfoList: [],
+      dispatchSlowSpeed: 5120,
+      downloadMaxTaskNum: 3,
+      uploadMaxTaskNum: 3,
+      expirTime: 0,
+      interstitialInterval: 0,
+      interstitialShowCount: 0,
+      isInitAd: 0,
+      isOpenAbortAd: false,
+      isOpenDownloadAd: false,
+      isOpenMineAd: false,
+      isOpenSplash: false,
+      isOpenUploadAd: false,
+      preloadConfig: {
+        androidInter: 0,
+        androidSplash: 0,
+        iosInter: 0,
+        iosSplash: 0
+      },
+      showCount: 0,
+      splashInterval: 0,
+      splashIntervalTime: 0
+    }
+  };
+}
+
+function emptyAppAdConfigResponse() {
+  return {
+    code: 0,
+    message: "ok",
+    data: {
+      continuousPay: 0,
+      goodsName: "",
+      iosGoodsId: "",
+      isInitAd: 0,
+      loadBuyEntryMode: 0,
+      loadVipBuyId: 0,
+      BuyRemoveAds: 0,
+      RemoveAdsTime: 0,
+      RemoveAdsEffect: 0,
+      removeAdsEffect: 0,
+      button_download: 0,
+      button_quit: 0,
+      button_return_file: 0,
+      button_splash_screen: 0,
+      button_upload: 0,
+      button_user_center: 0,
+      removeAdConfig: {
+        BuyRemoveAds: 0,
+        RemoveAdsTime: 0,
+        button_download: 0,
+        button_quit: 0,
+        button_return_file: 0,
+        button_splash_screen: 0,
+        button_upload: 0,
+        button_user_center: 0,
+        firstPrice: 0,
+        mainTitle: "",
+        payButtonFirst: "",
+        payButtonRenew: "",
+        remove_ads_effect: 0,
+        renewPrice: 0,
+        subTitle: "",
+        topTitle: ""
+      }
+    }
+  };
+}
+
+if (isRequestPhase && isBannerConfigRequest()) {
+  finish({ __response: emptyProjectAdResponse() });
+} else if (isRequestPhase && isMainApiHost() && /\/api\/v2\/advert_resource\/get/.test(url)) {
+  finish({ __response: { code: 0, message: "ok", data: [] } });
+} else if (isRequestPhase && isMainApiHost() && /\/api\/app\/config\/get/.test(url)) {
+  finish({ __response: emptyAppAdConfigResponse() });
+} else if (isRequestPhase) {
+  $done({});
+} else if (isBootstrapConfig()) {
   const obj = safeJson(body);
   if (obj && obj.data) {
     scrubHomeAdResources(obj.data, 0);
