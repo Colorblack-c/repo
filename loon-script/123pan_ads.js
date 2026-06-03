@@ -26,13 +26,27 @@ function noAdId() {
 function isHomeAdResource(value) {
   return typeof value === "string" && (
     /\/static-by-custom\/img\/app_ad_[^/]+\.(?:png|jpe?g|webp|gif)/i.test(value) ||
-    /\/manager\/advert_resource\/[^/]+\.(?:png|jpe?g|webp|gif)/i.test(value)
+    /\/manager\/advert_resource\/[^/]+\.(?:png|jpe?g|webp|gif)/i.test(value) ||
+    /app_(?:home|ad)[^/]*\.(?:png|jpe?g|webp|gif)/i.test(value)
+  );
+}
+
+function isHomeAdObject(value) {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return false;
+
+  const text = JSON.stringify(value);
+  return (
+    value.advert_position === 2001 ||
+    value.business_key === "BannerAdv" ||
+    value.businessKey === "BannerAdv" ||
+    /BannerAdv|app_(?:home|ad)|static-by-custom\/img\/app_ad_|manager\/advert_resource/i.test(text)
   );
 }
 
 function hasHomeAdResource(value) {
   if (!value || typeof value !== "object") return isHomeAdResource(value);
   if (Array.isArray(value)) return value.some(hasHomeAdResource);
+  if (isHomeAdObject(value)) return true;
   return Object.keys(value).some((key) => hasHomeAdResource(value[key]));
 }
 
@@ -41,7 +55,7 @@ function scrubHomeAdResources(value, depth) {
 
   if (Array.isArray(value)) {
     for (let i = value.length - 1; i >= 0; i -= 1) {
-      if (hasHomeAdResource(value[i])) {
+      if (isHomeAdObject(value[i]) || hasHomeAdResource(value[i])) {
         value.splice(i, 1);
       } else {
         scrubHomeAdResources(value[i], depth + 1);
@@ -53,7 +67,7 @@ function scrubHomeAdResources(value, depth) {
   Object.keys(value).forEach((key) => {
     const child = value[key];
     if (Array.isArray(child) && hasHomeAdResource(child)) {
-      value[key] = null;
+      value[key] = [];
     } else if (isHomeAdResource(child)) {
       value[key] = "";
     } else {
@@ -110,12 +124,16 @@ function cleanRemoveAdConfig(data) {
 function cleanProjectAdConfig(data) {
   if (!data || typeof data !== "object") return;
 
-  data.bannerList = null;
-  data.advertResource = null;
-  data.advertResourceList = null;
-  data.advertisementList = null;
-  data.homeBannerList = null;
-  data.middleBannerList = null;
+  data.bannerList = [];
+  data.advertResource = [];
+  data.advertResourceList = [];
+  data.advertisementList = [];
+  data.homeBannerList = [];
+  data.middleBannerList = [];
+  data.carouselList = [];
+  data.swiperList = [];
+  data.focusList = [];
+  data.ownAdInfo = {};
   data.isInitAd = 0;
   data.isOpenAbortAd = false;
   data.isOpenDownloadAd = false;
@@ -164,9 +182,12 @@ function cleanOwnAdResourcePayload(obj) {
       "popupList",
       "bannerList",
       "homeBannerList",
-      "middleBannerList"
+      "middleBannerList",
+      "carouselList",
+      "swiperList",
+      "focusList"
     ].forEach((key) => {
-      if (key in data) data[key] = Array.isArray(data[key]) ? [] : null;
+      if (key in data) data[key] = Array.isArray(data[key]) ? [] : {};
     });
   }
 
@@ -179,7 +200,19 @@ function isMainApiHost() {
   return /(?:api\.123278\.com|apigate\.123295\.com|apigate\.123773\.com)\/api\//.test(url);
 }
 
-if (isMainApiHost() && /\/api\/app\/config\/get/.test(url)) {
+function isBootstrapConfig() {
+  return /apigate\.123795\.com\/getconfig-api\/v1\/getconfig/.test(url);
+}
+
+if (isBootstrapConfig()) {
+  const obj = safeJson(body);
+  if (obj && obj.data) {
+    scrubHomeAdResources(obj.data, 0);
+    finish(obj);
+  } else {
+    finish(body);
+  }
+} else if (isMainApiHost() && /\/api\/app\/config\/get/.test(url)) {
   const obj = safeJson(body);
   if (obj && obj.data) {
     cleanRemoveAdConfig(obj.data);
