@@ -65,9 +65,11 @@ function checkin() {
 
     if (isSuccessful(status, data, message)) {
       markDoneToday(status, message);
+      notify("签到完成", `HTTP ${status}${message ? " - " + message : ""}`);
+      return $done();
     }
 
-    notify("签到完成", `HTTP ${status}${message ? " - " + message : ""}`);
+    notify("签到未完成", `HTTP ${status}${message ? " - " + message : ""}`);
     $done();
   });
 }
@@ -107,7 +109,7 @@ function isSuccessful(status, data, message) {
   if (code < 200 || code >= 300) return false;
 
   const text = `${data || ""} ${message || ""}`;
-  if (/101009|系统正忙|失败|错误|error/i.test(text)) return false;
+  if (/S1013|101009|系统正忙|请稍候|失败|错误|异常|error|fail/i.test(text)) return false;
   return true;
 }
 
