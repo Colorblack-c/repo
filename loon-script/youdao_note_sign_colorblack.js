@@ -78,6 +78,10 @@ function isCheckinRequest(url) {
   return /\/yws\/mapi\/user\?method=checkin/.test(url || '');
 }
 
+function bodyLooksLikeCheckin(body) {
+  return /(^|&)strategy=VIP_MULTIPLY(&|$)/.test(body || '');
+}
+
 function isUsefulYoudaoRequest(url) {
   if (!url) return false;
 
@@ -133,7 +137,14 @@ function saveCredentialFromRequest() {
 
   // 有 Body 的请求才更新 Body。没有 Body 不覆盖旧 Body。
   // 签到接口本身一定要保存，因为这是最准确的签到 Body。
-  if (body && (body.length >= MIN_VALID_BODY_LENGTH || isCheckinRequest(url))) {
+  // 如果已经保存过签到 Body，普通接口 Body 不再覆盖，避免丢掉 strategy=VIP_MULTIPLY。
+  const savedBody = read(KEY_BODY, '');
+  const shouldSaveBody =
+    body &&
+    (body.length >= MIN_VALID_BODY_LENGTH || isCheckinRequest(url)) &&
+    (isCheckinRequest(url) || !bodyLooksLikeCheckin(savedBody));
+
+  if (shouldSaveBody) {
     write(KEY_BODY, body);
     write(KEY_BODY_TIME, now());
     saved.push('Body');
@@ -178,9 +189,19 @@ function getBodyForCheckin() {
   const savedBody = read(KEY_BODY, '');
   if (savedBody) {
     // 保留原请求参数，只把网络字段修正成 wifi，避免异常。
-    return savedBody
+    let body = savedBody
       .replace(/(^|&)net=[^&]*/g, '$1net=wifi')
       .replace(/(^|&)_network=[^&]*/g, '$1_network=wifi');
+
+    // 手动签到请求会带 strategy=VIP_MULTIPLY。普通接口 Body 没有这个字段，
+    // 直接复用会只触发容量接口，但可能不刷新 App 签到按钮读取的活动状态。
+    if (/(^|&)strategy=/.test(body)) {
+      body = body.replace(/(^|&)strategy=[^&]*/g, '$1strategy=VIP_MULTIPLY');
+    } else {
+      body += '&strategy=VIP_MULTIPLY';
+    }
+
+    return body;
   }
 
   return buildDefaultBody();
