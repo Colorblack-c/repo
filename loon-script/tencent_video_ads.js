@@ -52,8 +52,7 @@ const keepKeyPattern = /^(address|advance|advise|video|vod|avatar|brand|broadcas
 const adUrlPattern = /(?:gdt\.qq\.com|gdtimg\.com|pgdt\.gtimg\.cn|p2\.l\.qq\.com|miaozhen\.com|in-neo\.cn|reachmax\.cn|mim-x\.jd\.com|ccc-x\.jd\.com|tanx\.com|s\.iwan\.qq\.com|\/(?:starter|promotionTest)\/|\/ad[._/-]|advert|splash|popup|banner|promotion)/i;
 const directRejectHostPattern = /^https?:\/\/xs\.gdt\.qq\.com\//i;
 const iVideoUrlPattern = /^https?:\/\/i\.video\.qq\.com\//i;
-const promotionServicePattern = /(?:trpc\.promotion\.adapter\.adapter\/GetFloatActivity|trpc\.flow_pool\.gateway\.FlowPoolActivity\/GetPromotionGlobalConfig|trpc\.vip_ad_promotion\.access_adaptor\.CommonAccessService\/AccessPromotion|trpc\.iwan\.chosen_page_service\.ChosenPageService\/GetRecentGameSlip|trpc\.iwan\.sdk_report\.Report\/GetGameInfoV2|trpc\.iwan\.valueattribution\.ValueAttribution\/AttributionReport|trpc\.growth_raptor\.access\.AccessApi\/activity\/access\/PopupContentWithTask|trpc\.iwan\.usr_portrait\.UsrPortrait\/OnlineInsightsWarmUp)/i;
-const protobufAdMarkerPattern = /(?:type\.googleapis\.com\/com\.tencent\.qqlive\.protocol\.pb\.Ad(?:FeedInfo|FocusPoster)|ad_block_[12]|_ad_insert_mix_block|ad_nfb_|material_url|view_ad_ssp_|InnerAdCommonPromotionEventActivityList|promotionTest|ad_control_config_test|review\.gdtimg\.com|pgdt\.gtimg\.cn|ccc-x\.jd\.com|s\.iwan\.qq\.com)/i;
+const promotionServicePattern = /(?:trpc\.promotion\.adapter\.adapter\/GetFloatActivity|trpc\.flow_pool\.gateway\.FlowPoolActivity\/GetPromotionGlobalConfig|trpc\.vip_ad_promotion\.access_adaptor\.CommonAccessService\/AccessPromotion|trpc\.iwan\.chosen_page_service\.ChosenPageService\/GetRecentGameSlip|trpc\.iwan\.sdk_report\.Report\/GetGameInfoV2|trpc\.iwan\.valueattribution\.ValueAttribution\/AttributionReport|trpc\.growth_raptor\.access\.AccessApi\/activity\/access\/PopupContentWithTask|trpc\.iwan\.usr_portrait\.UsrPortrait\/OnlineInsightsWarmUp|trpc\.reward_ad_ssp\.[^/]+\/[A-Za-z0-9_]*Reward[A-Za-z0-9_]*|trpc\.business_feeds\.video_ad_ssp_feeds\.ServerAdFeedsVideo\/GetPersonalCenterAdData|trpc\.adapter_group\.mobile_sdk_adapter\.CMCCPromoPushService\/GetSDKInitData|trpc\.activity\.memberExperience\.ActivityTcp\/getHomeGrowPopupUrl)/i;
 
 function isAdKey(key) {
   if (!key || keepKeyPattern.test(key)) return false;
@@ -151,47 +150,6 @@ function cleanKnownConfig(obj) {
   return scrub(obj, 0);
 }
 
-function makeSameLengthBlank(source) {
-  if (!source) return source;
-  const prefix = source.startsWith("http://") ? "http://0.0.0.0/" : "https://0.0.0.0/";
-  if (source.length <= prefix.length) return " ".repeat(source.length);
-  return prefix + "#".repeat(source.length - prefix.length);
-}
-
-function scrubProtobufText(body) {
-  if (typeof body !== "string" || !protobufAdMarkerPattern.test(body)) return body;
-
-  let changed = body;
-
-  changed = changed.replace(/https?:\/\/(?:pgdt\.gtimg\.cn|[^/\s"]+\.gdt\.qq\.com|review\.gdtimg\.com|p2\.l\.qq\.com|tytx\.m\.cn\.miaozhen\.com|t\.in-neo\.cn|v2\.reachmax\.cn|mim-x\.jd\.com|ccc-x\.jd\.com|ef-dongfeng\.tanx\.com|s\.iwan\.qq\.com)[^\s"'<>\\]+/gi, makeSameLengthBlank);
-  changed = changed.replace(/https?:\/\/(?:vfiles|wfiles)\.gtimg\.cn\/(?:wuji_dashboard\/)?(?:wupload\/)?xy\/(?:starter|promotionTest)\/[^\s"'<>\\]+/gi, makeSameLengthBlank);
-  changed = changed.replace(/https?:\/\/(?:ugd|ugcyz)\.gtimg\.com\/[^\s"'<>\\]+/gi, makeSameLengthBlank);
-
-  [
-    "type.googleapis.com/com.tencent.qqlive.protocol.pb.AdFeedInfo",
-    "type.googleapis.com/com.tencent.qqlive.protocol.pb.AdFocusPoster",
-    "InnerAdCommonPromotionEventActivityList",
-    "ad_control_config_test",
-    "_ad_insert_mix_block",
-    "material_url"
-  ].forEach((marker) => {
-    changed = changed.split(marker).join(" ".repeat(marker.length));
-  });
-
-  changed = changed.replace(/ad_block_[12]/g, "ad_block_0");
-  changed = changed.replace(/ad_nfb_[A-Za-z0-9_]+/g, (match) => " ".repeat(match.length));
-  changed = changed.replace(/view_ad_ssp_[A-Za-z0-9_]+/g, (match) => " ".repeat(match.length));
-
-  return changed;
-}
-
-function shouldReturnEmptyPromotion(body) {
-  if (typeof body !== "string") return false;
-  if (promotionServicePattern.test(body)) return true;
-  if (body.length > 30000) return false;
-  return /(?:InnerAdCommonPromotionEventActivityList|trpc\.vip_ad_promotion|promotionTest|s\.iwan\.qq\.com|growth_raptor)/i.test(body);
-}
-
 if (isRequestPhase) {
   if (directRejectHostPattern.test(url)) {
     respond("{}");
@@ -203,11 +161,7 @@ if (isRequestPhase) {
 } else {
   const json = safeJson(rawBody);
   if (json === null) {
-    if (shouldReturnEmptyPromotion(rawBody)) {
-      done("");
-    } else {
-      done(scrubProtobufText(rawBody));
-    }
+    pass();
   } else {
     done(cleanKnownConfig(json));
   }
