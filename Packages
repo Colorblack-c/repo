@@ -1,21 +1,5 @@
 Package: com.colorblack.bottomx
 Version: 0.2.67
-Architecture: iphoneos-arm64e
-Maintainer: Color Black
-Installed-Size: 1944
-Depends: mobilesubstrate | ellekit, preferenceloader, firmware (>= 14.0)
-Filename: ./debs/Bottomx_0.2.67_roothide_隐根版.deb
-Size: 495284
-MD5sum: bddca6facfae39438062fa9e16959488
-SHA1: cfe8cefc004308006a4e88e4f2181f6401cb792c
-SHA256: 96655de0c41494ce1a3daf9e0bef21adc3c753a7cdd07089be5990448bb9a050
-Section: Tweaks
-Description: 点击底部小白条返回，如在二级，三级页面是返回上一级，如是 app 最顶层就会返回桌面。可以注入 app 使用。 银行类app可能不起作用; 感兴趣可以加 QQ 群 2059 28931
-Author: Color Black
-Name: Bottom-x roothide
-
-Package: com.colorblack.bottomx
-Version: 0.2.67
 Architecture: iphoneos-arm64
 Maintainer: Color Black
 Installed-Size: 1944
@@ -29,6 +13,22 @@ Section: Tweaks
 Description: 点击底部小白条返回，如在二级，三级页面是返回上一级，如是 app 最顶层就会返回桌面。可以注入 app 使用。 银行类app可能不起作用; 感兴趣可以加 QQ 群 2059 28931
 Author: Color Black
 Name: Bottom-x
+
+Package: com.colorblack.bottomx
+Version: 0.2.67
+Architecture: iphoneos-arm64e
+Maintainer: Color Black
+Installed-Size: 1944
+Depends: mobilesubstrate | ellekit, preferenceloader, firmware (>= 14.0)
+Filename: ./debs/Bottomx_0.2.67_roothide_隐根版.deb
+Size: 495284
+MD5sum: bddca6facfae39438062fa9e16959488
+SHA1: cfe8cefc004308006a4e88e4f2181f6401cb792c
+SHA256: 96655de0c41494ce1a3daf9e0bef21adc3c753a7cdd07089be5990448bb9a050
+Section: Tweaks
+Description: 点击底部小白条返回，如在二级，三级页面是返回上一级，如是 app 最顶层就会返回桌面。可以注入 app 使用。 银行类app可能不起作用; 感兴趣可以加 QQ 群 2059 28931
+Author: Color Black
+Name: Bottom-x roothide
 
 Package: com.colorblack.bottomx
 Version: 0.2.68
@@ -61,6 +61,38 @@ Section: Tweaks
 Description: 点击底部小白条返回，如在二级，三级页面是返回上一级，如是 app 最顶层就会返回桌面。可以注入 app 使用。 银行类app可能不起作用; 感兴趣可以加 QQ 群 2059 28931
 Author: Color Black
 Name: Bottom-x
+
+Package: com.colorblack.wetypematerialglass
+Version: 1.2.6
+Architecture: iphoneos-arm64e
+Maintainer: colorblack
+Installed-Size: 220
+Depends: mobilesubstrate
+Filename: ./debs/微信输入法-毛玻璃效果_1.2.6_roothide_iphoneos-arm64e.deb
+Size: 21874
+MD5sum: 674ea93be1199f2c2cde5f78aa185ed4
+SHA1: 05d1e1ca45510bd2d0f646dfbc8b8716e444c919
+SHA256: 7afd9e3aabc2c42b44d330d6ff1a5e0df7a024929b13802790344cfc5b62228d
+Section: 输入法皮肤
+Description: 微信输入法启用毛玻璃效果，测试输入法版本号 3.5.0。1.2.6 独立适配浅色 Dock 风格毛玻璃，同时保留 1.2.5 暗黑模式效果。QQ群：205928931
+Author: colorblack
+Name: 微信输入法_毛玻璃效果 Roothide
+
+Package: com.colorblack.wetypematerialglass
+Version: 1.2.6
+Architecture: iphoneos-arm64
+Maintainer: colorblack
+Installed-Size: 236
+Depends: mobilesubstrate
+Filename: ./debs/微信输入法-毛玻璃效果_1.2.6_rootless_iphoneos-arm64.deb
+Size: 21870
+MD5sum: 2f72a78609b03e52c4c047f785cae900
+SHA1: b9e7cc840f7a91bdb3e6fac4a9d8fa61c7aa378d
+SHA256: 2b60a0c10b44fc57983c26f9e1eed84aed569beda671b57f2e5980b8e4360f26
+Section: 输入法皮肤
+Description: 微信输入法启用毛玻璃效果，测试输入法版本号 3.5.0。1.2.6 独立适配浅色 Dock 风格毛玻璃，同时保留 1.2.5 暗黑模式效果。QQ群：205928931
+Author: colorblack
+Name: 微信输入法_毛玻璃效果
 
 Package: com.necromancy.tweak
 Version: 1.2.6
