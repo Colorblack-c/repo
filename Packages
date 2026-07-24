@@ -128,22 +128,6 @@ Name: Bottom-x roothide
 
 Package: com.colorblack.bottomx
 Version: 0.2.70
-Architecture: iphoneos-arm64e
-Maintainer: Color Black
-Installed-Size: 3428
-Depends: mobilesubstrate | ellekit, preferenceloader, firmware (>= 14.0)
-Filename: ./debs/Bottomx_0.2.70_roothide隐根版.deb
-Size: 827130
-MD5sum: b3cc37de9b6ca3f110334266d535ea10
-SHA1: a9e502d13887ef592926d518dca0e2956ba880c4
-SHA256: f27e8311d82ce1a1ac7bbee82c047598d7a786c1035ea2747460857069aff67f
-Section: Tweaks
-Description: 点击底部小白条逐级返回，到app最顶层就会返回桌面，新增学习返回模式，视觉返回保留。; 感兴趣可以加 QQ 群 2059 28931
-Author: Color Black
-Name: Bottom-x roothide
-
-Package: com.colorblack.bottomx
-Version: 0.2.70
 Architecture: iphoneos-arm64
 Maintainer: Color Black
 Installed-Size: 3428
@@ -157,6 +141,22 @@ Section: Tweaks
 Description: 点击底部小白条逐级返回，到app最顶层就会返回桌面，新增学习返回模式，视觉返回保留。; 感兴趣可以加 QQ 群 2059 28931
 Author: Color Black
 Name: Bottom-x
+
+Package: com.colorblack.bottomx
+Version: 0.2.70
+Architecture: iphoneos-arm64e
+Maintainer: Color Black
+Installed-Size: 3428
+Depends: mobilesubstrate | ellekit, preferenceloader, firmware (>= 14.0)
+Filename: ./debs/Bottomx_0.2.70_roothide隐根版.deb
+Size: 827130
+MD5sum: b3cc37de9b6ca3f110334266d535ea10
+SHA1: a9e502d13887ef592926d518dca0e2956ba880c4
+SHA256: f27e8311d82ce1a1ac7bbee82c047598d7a786c1035ea2747460857069aff67f
+Section: Tweaks
+Description: 点击底部小白条逐级返回，到app最顶层就会返回桌面，新增学习返回模式，视觉返回保留。; 感兴趣可以加 QQ 群 2059 28931
+Author: Color Black
+Name: Bottom-x roothide
 
 Package: com.colorblack.wetypecolorgoogle
 Version: 1.1.2
@@ -224,22 +224,6 @@ Name: 微信输入法_Google配色
 
 Package: com.colorblack.wetypecolorgoogle
 Version: 1.1.4
-Architecture: iphoneos-arm64
-Maintainer: colorblack
-Installed-Size: 144
-Depends: mobilesubstrate
-Filename: ./debs/微信输入法-Google毛玻璃配色_1.1.4_rootless.deb
-Size: 28906
-MD5sum: 8e80615cf339c78a1bb7cfe95d32bcf3
-SHA1: 6a6a44e6de092eefa3efe3507b7d8e6699dcdf33
-SHA256: 810055fa18408199b0e5f8e33fa62a56fa3bfc748d393d2245fe04c6549861cb
-Section: 输入法皮肤
-Description: 微信输入法 Google 风格毛玻璃键盘配色，适配深色、浅色模式；测试输入法版本 3.5.0。QQ群：205928931
-Author: colorblack
-Name: 微信输入法_Google配色
-
-Package: com.colorblack.wetypecolorgoogle
-Version: 1.1.4
 Architecture: iphoneos-arm64e
 Maintainer: colorblack
 Installed-Size: 144
@@ -253,6 +237,22 @@ Section: 输入法皮肤
 Description: 微信输入法 Google 风格毛玻璃键盘配色 Roothide 版，适配深色、浅色模式；测试输入法版本 3.5.0。QQ群：205928931
 Author: colorblack
 Name: 微信输入法_Google配色 Roothide
+
+Package: com.colorblack.wetypecolorgoogle
+Version: 1.1.4
+Architecture: iphoneos-arm64
+Maintainer: colorblack
+Installed-Size: 144
+Depends: mobilesubstrate
+Filename: ./debs/微信输入法-Google毛玻璃配色_1.1.4_rootless.deb
+Size: 28906
+MD5sum: 8e80615cf339c78a1bb7cfe95d32bcf3
+SHA1: 6a6a44e6de092eefa3efe3507b7d8e6699dcdf33
+SHA256: 810055fa18408199b0e5f8e33fa62a56fa3bfc748d393d2245fe04c6549861cb
+Section: 输入法皮肤
+Description: 微信输入法 Google 风格毛玻璃键盘配色，适配深色、浅色模式；测试输入法版本 3.5.0。QQ群：205928931
+Author: colorblack
+Name: 微信输入法_Google配色
 
 Package: com.colorblack.wetypecolorgoogle
 Version: 1.1.5
@@ -288,22 +288,6 @@ Name: 微信输入法_Google配色 Roothide
 
 Package: com.colorblack.wetypematerialglass
 Version: 1.2.6
-Architecture: iphoneos-arm64e
-Maintainer: colorblack
-Installed-Size: 220
-Depends: mobilesubstrate
-Filename: ./debs/微信输入法-毛玻璃效果_1.2.6_roothide_iphoneos-arm64e.deb
-Size: 21874
-MD5sum: 674ea93be1199f2c2cde5f78aa185ed4
-SHA1: 05d1e1ca45510bd2d0f646dfbc8b8716e444c919
-SHA256: 7afd9e3aabc2c42b44d330d6ff1a5e0df7a024929b13802790344cfc5b62228d
-Section: 输入法皮肤
-Description: 微信输入法启用毛玻璃效果，测试输入法版本号 3.5.0。1.2.6 独立适配浅色 Dock 风格毛玻璃，同时保留 1.2.5 暗黑模式效果。QQ群：205928931
-Author: colorblack
-Name: 微信输入法_毛玻璃效果 Roothide
-
-Package: com.colorblack.wetypematerialglass
-Version: 1.2.6
 Architecture: iphoneos-arm64
 Maintainer: colorblack
 Installed-Size: 236
@@ -317,6 +301,22 @@ Section: 输入法皮肤
 Description: 微信输入法启用毛玻璃效果，测试输入法版本号 3.5.0。1.2.6 独立适配浅色 Dock 风格毛玻璃，同时保留 1.2.5 暗黑模式效果。QQ群：205928931
 Author: colorblack
 Name: 微信输入法_毛玻璃效果
+
+Package: com.colorblack.wetypematerialglass
+Version: 1.2.6
+Architecture: iphoneos-arm64e
+Maintainer: colorblack
+Installed-Size: 220
+Depends: mobilesubstrate
+Filename: ./debs/微信输入法-毛玻璃效果_1.2.6_roothide_iphoneos-arm64e.deb
+Size: 21874
+MD5sum: 674ea93be1199f2c2cde5f78aa185ed4
+SHA1: 05d1e1ca45510bd2d0f646dfbc8b8716e444c919
+SHA256: 7afd9e3aabc2c42b44d330d6ff1a5e0df7a024929b13802790344cfc5b62228d
+Section: 输入法皮肤
+Description: 微信输入法启用毛玻璃效果，测试输入法版本号 3.5.0。1.2.6 独立适配浅色 Dock 风格毛玻璃，同时保留 1.2.5 暗黑模式效果。QQ群：205928931
+Author: colorblack
+Name: 微信输入法_毛玻璃效果 Roothide
 
 Package: com.example.wifileasekeeper
 Version: 1.0.10
@@ -346,6 +346,40 @@ Size: 303158
 MD5sum: 499efb111f25fcbfdba121a5d3fc50bb
 SHA1: ad8cfb1db46e01f50ec07269ca090eebd6e9ac44
 SHA256: 1831e3c9a0d545da56c27c316aabd91ff72d4cc42f4fab7cefdec1fb13a36c4a
+Section: 辅助工具
+Priority: optional
+Description: 仅为白名单 Wi-Fi 防休眠,锁屏8小时耗电4%左右,(本插件实际为解决 连安卓热点苹果锁屏会断开 wifi的痛点) QQ群 205928931
+Author: colorblack
+Name: wifi 锁屏不断连 roothide
+
+Package: com.example.wifileasekeeper
+Version: 1.0.11
+Architecture: iphoneos-arm64
+Maintainer: colorblack
+Installed-Size: 1060
+Depends: firmware (>= 15.0), preferenceloader, mobilesubstrate (>= 0.9.5000)
+Filename: ./debs/wifi锁屏不断连_1.0.11_rootless.deb
+Size: 304784
+MD5sum: 466cc66dd47e80a7a9d5e354a7ba3607
+SHA1: e3246bf19ef3cd616ad7cf3ebf96cc9545bc9fab
+SHA256: 344194b327624144bfb7a9ec002ec4692da9d3076e48a0a8f5537f61e25190bd
+Section: 辅助工具
+Priority: optional
+Description: 仅为白名单 Wi-Fi 防休眠,锁屏8小时耗电4%左右,(本插件实际为解决 连安卓热点苹果锁屏会断开 wifi的痛点) QQ群 205928931
+Author: colorblack
+Name: wifi 锁屏不断连
+
+Package: com.example.wifileasekeeper
+Version: 1.0.11
+Architecture: iphoneos-arm64e
+Maintainer: colorblack
+Installed-Size: 1060
+Depends: firmware (>= 15.0), preferenceloader, mobilesubstrate (>= 0.9.5000)
+Filename: ./debs/wifi锁屏不断连_1.0.11_RootHide.deb
+Size: 303190
+MD5sum: 36f5948f0f5180335a44de81b2335fce
+SHA1: c7a15e1143237af0bee4527949afeb901c3f12d4
+SHA256: 9d848819223397cbc05ae735d6cb61ad10117652c3e3cd12e25310893ba88e26
 Section: 辅助工具
 Priority: optional
 Description: 仅为白名单 Wi-Fi 防休眠,锁屏8小时耗电4%左右,(本插件实际为解决 连安卓热点苹果锁屏会断开 wifi的痛点) QQ群 205928931
