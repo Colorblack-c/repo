@@ -158,6 +158,38 @@ Description: 点击底部小白条逐级返回，到app最顶层就会返回桌�
 Author: Color Black
 Name: Bottom-x roothide
 
+Package: com.colorblack.bottomx
+Version: 0.2.71
+Architecture: iphoneos-arm64
+Maintainer: Color Black
+Installed-Size: 3044
+Depends: mobilesubstrate | ellekit, preferenceloader, firmware (>= 14.0)
+Filename: ./debs/Bottomx_0.2.71_越狱版.deb
+Size: 730316
+MD5sum: 7574069701fbb8b11d0d4a1bd56e202f
+SHA1: 64484ed50338424417670e7b2ab16a5ac4fbd929
+SHA256: 2a4aadd998da7257b86361c54c78f942e21f2bbaad7189d9d1e6931d5ddaa388
+Section: Tweaks
+Description: 点击底部小白条逐级返回，到app最顶层就会返回桌面，新增学习返回模式，视觉返回保留。; 感兴趣可以加 QQ 群 2059 28931
+Author: Color Black
+Name: Bottom-x
+
+Package: com.colorblack.bottomx
+Version: 0.2.71
+Architecture: iphoneos-arm64e
+Maintainer: Color Black
+Installed-Size: 3044
+Depends: mobilesubstrate | ellekit, preferenceloader, firmware (>= 14.0)
+Filename: ./debs/Bottomx_0.2.71_roothide隐根版.deb
+Size: 728108
+MD5sum: 56dd97bac161f29273c97cffa9e0fa1a
+SHA1: 35cf5940dbed37f7f74fd49825398f7b778df2aa
+SHA256: ca13657c6ade9aefd25c358a1077e9b66a43adeb99dc4c7a0d16d54bb2f23e34
+Section: Tweaks
+Description: 点击底部小白条逐级返回，到app最顶层就会返回桌面，新增学习返回模式，视觉返回保留。; 感兴趣可以加 QQ 群 2059 28931
+Author: Color Black
+Name: Bottom-x roothide
+
 Package: com.colorblack.wetypecolorgoogle
 Version: 1.1.2
 Architecture: iphoneos-arm64e
