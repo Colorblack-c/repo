@@ -1,0 +1,13 @@
+{
+  "format": "com.adlayer.github-subscription",
+  "formatVersion": 1,
+  "subscriptionID": "com.colorblack.adlayer.flex4beta.rules",
+  "name": "Flex 4 Beta 全部规则",
+  "publisher": "Colorblack-c",
+  "revision": 1,
+  "publishedAt": "2026-09-07T06:28:38Z",
+  "minimumClientVersion": "0.1.98",
+  "packageURL": "https://raw.githubusercontent.com/Colorblack-c/repo/81b924d97576d558fb55a1da1cccaae481547bb4/FlexScript/Flex4Beta-All-Rules.adlrules.json",
+  "packageSHA256": "c88ba5e7c4e11eaf01e711da288f2571277bb3127136b41ad1fd8a9491a47611",
+  "releaseNotes": "首次发布 GitHub 规则订阅，包含 41 个 App、106 条规则。"
+}
