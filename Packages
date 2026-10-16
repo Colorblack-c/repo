@@ -515,6 +515,23 @@ Description: 微信输入法皮肤切换器，暂时5款，2款免费（免费�
 Author: 待配置
 Name: 微信输入法皮肤切换器（Relaxin · iOS 17）
 
+Package: com.colorblack.wetypeskinswitcher.relaxin
+Version: 0.1.17
+Architecture: iphoneos-arm64e
+Maintainer: colorblack
+Installed-Size: 23036
+Depends: mobilesubstrate, firmware (>= 17.0), firmware (<< 17.3.2)
+Conflicts: com.colorblack.wetypematerialglass, com.colorblack.wetypecolorgoogle, com.colorblack.wetypetypewriter, com.colorblack.elegantgreen, com.colorblack.wetypeskinswitcher
+Filename: ./debs/微信输入法皮肤切换器-_0.1.17_relaxin.deb
+Size: 15278056
+MD5sum: fbd448c2ceea5f906b5198509e32d17f
+SHA1: 64a69468edc0e271f6e394388475052e39dc2d34
+SHA256: d4ce4149c6d266572fc8a9c1d62cb4ec9728e3483126495cbe19bd8e8bec80d4
+Section: 输入法皮肤
+Description: 微信输入法皮肤切换器，暂时5款，2款免费（免费单独下载其他包即可）3款收费，后期不定期更新。QQ群：205928931
+Author: 待配置
+Name: 微信输入法皮肤切换器（Relaxin · iOS 17）
+
 Package: com.example.wifileasekeeper
 Version: 1.0.10
 Architecture: iphoneos-arm64
