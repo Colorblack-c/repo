@@ -464,6 +464,23 @@ Description: 微信输入法皮肤切换器，暂时5款，2款免费（免费�
 Author: 待配置
 Name: 微信输入法皮肤切换器（Rootless）
 
+Package: com.colorblack.wetypeskinswitcher
+Version: 0.1.17
+Architecture: iphoneos-arm64e
+Maintainer: colorblack
+Installed-Size: 23128
+Depends: mobilesubstrate, firmware (>= 15.1), firmware (<< 17.0)
+Conflicts: com.colorblack.wetypematerialglass, com.colorblack.wetypecolorgoogle, com.colorblack.wetypetypewriter, com.colorblack.elegantgreen, com.colorblack.wetypeskinswitcher.relaxin
+Filename: ./debs/微信输入法皮肤切换器-_0.1.17_roothide.deb
+Size: 15283460
+MD5sum: b75e7413153bb3682544c98dd5fee8b9
+SHA1: 8bd7196c7e6ec8a474bfc154875a116c3321df03
+SHA256: 1ed5ec53b2eb18887867f0835181c927b5217554bb51a0f0913b397460394fcd
+Section: 输入法皮肤
+Description: 微信输入法皮肤切换器，暂时5款，2款免费（免费单独下载其他包即可）3款收费，后期不定期更新。QQ群：205928931
+Author: 待配置
+Name: 微信输入法皮肤切换器（RootHide）
+
 Package: com.colorblack.wetypeskinswitcher.relaxin
 Version: 0.1.16
 Architecture: iphoneos-arm64e
